@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="confirm">confirm</string>
+    <string name="cancel">cancel</string>
+    <string_array name="dog">
+        <item>muyang</item>
+        <item>jinmao</item>
+    </string_array>
+</resources>
