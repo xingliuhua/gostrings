@@ -1,0 +1,40 @@
+// Automatically generated file, do not change the file
+package r
+
+import (
+	"errors"
+)
+
+var NotFoundError = errors.New("data not found")
+var allString = make(map[string]map[string]string)
+var allStringArray = make(map[string]map[string][]string)
+
+// GetString if no data is found, it will return "" and NotFoundError.
+//
+// eg: r.GetString("en",r.xxx)
+func GetString(language, key string) (string, error) {
+	m, exist := allString[language]
+	if !exist {
+		return "", NotFoundError
+	}
+	value, exist := m[key]
+	if !exist {
+		return "", NotFoundError
+	}
+	return value, nil
+}
+
+// GetString if no data is found, it will return nil and NotFoundError
+//
+// eg: r.GetStringArray("en",r.xxx)
+func GetStringArray(language, key string) ([]string, error) {
+	m, exist := allStringArray[language]
+	if !exist {
+		return nil, NotFoundError
+	}
+	value, exist := m[key]
+	if !exist {
+		return nil, NotFoundError
+	}
+	return value, nil
+}

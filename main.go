@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -9,12 +10,22 @@ import (
 	"github.com/xingliuhua/gostrings/model"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"regexp"
 )
 
+//go:embed utils.go.txt
+var src string
+
 func main() {
+	fmt.Println("will generate r directory \nkey will be translate to camel style...")
+
 	err := generateStringResource()
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println("failed:", err)
+		return
+	}
+	fmt.Println("generate r success!")
 }
 
 func generateStringResource() error {
@@ -70,6 +81,8 @@ func generateStringResource() error {
 	if err != nil {
 		return err
 	}
+
+	exec.Command("bash", "-c", "go fmt ./r/r.go").Run()
 	return nil
 }
 func writeInitData(stringsData map[string]map[string]string, stringArrayData map[string]map[string][]string) error {
@@ -218,40 +231,6 @@ func createUtilFile() error {
 		return err
 	}
 	defer utilFile.Close()
-	src := `package r
-
-import (
-	"errors"
-)
-
-var NotFoundError = errors.New("data not found")
-var allString = make(map[string]map[string]string)
-var allStringArray = make(map[string]map[string][]string)
-
-func GetString(language, key string) (string, error) {
-	m, exist := allString[language]
-	if !exist {
-		return "", NotFoundError
-	}
-	value, exist := m[key]
-	if !exist {
-		return "", NotFoundError
-	}
-	return value, nil
-}
-
-func GetStringArray(language, key string) ([]string, error) {
-	m, exist := allStringArray[language]
-	if !exist {
-		return nil, NotFoundError
-	}
-	value, exist := m[key]
-	if !exist {
-		return nil, NotFoundError
-	}
-	return value, nil
-}
-`
 	bufferString := bytes.NewBufferString(src)
 	_, err = utilFile.WriteString(bufferString.String())
 	if err != nil {
