@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/iancoleman/strcase"
-	"github.com/xingliuhua/gostring/model"
+	"github.com/xingliuhua/gostrings/model"
 	"io/ioutil"
 	"os"
 	"regexp"
