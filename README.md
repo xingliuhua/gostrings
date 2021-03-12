@@ -18,6 +18,7 @@ go get github.com/xingliuhua/gostrings
 1. Create the strings folder at the root of the project.
 2. Create an. XML file in the strings folder (it must be in sting [language].XML format, and the abbreviation of the language is unlimited); for example string.xml 、string- en.xml 、string-en- us.xml 、string- zh.xml 、string- unknown.xml and so on.
 3. the normal string and string array can be placed in the XML file. For specific format, please refer to:
+
 string.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -31,6 +32,7 @@ string.xml
     </string_array>
 </resources>
 ```
+
 string-zh.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>

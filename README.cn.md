@@ -19,6 +19,7 @@
 1. 在项目根目录创建strings文件夹。
 2. 在strings文件夹中创建.xml文件(必须是sting[语言].xml格式，语言简称不限制);比如string.xml、string-en.xml、string-en-us.xml、string-zh.xml、string-unknown.xml等。
 3. .xml文件中可以放普通字符串和字符串数组。具体格式可以参考：
+
 string.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -32,6 +33,7 @@ string.xml
     </string_array>
 </resources>
 ```
+
 string-zh.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
