@@ -1,5 +1,5 @@
 [中文版](https://github.com/xingliuhua/gostrings/blob/master/README.cn.md)
-# gramod
+# gostrings
 
 This is an International Library of go strings. It can automatically generate go files according to XML resource files, which is convenient for unified string management.
 ## Background
