@@ -19,7 +19,6 @@
 1. 在项目根目录创建strings文件夹。
 2. 在strings文件夹中创建.xml文件(必须是sting[语言].xml格式，语言简称不限制);比如string.xml、string-en.xml、string-en-us.xml、string-zh.xml、string-unknown.xml等。
 3. .xml文件中可以放普通字符串和字符串数组。具体格式可以参考：
-
 string.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -33,7 +32,6 @@ string.xml
     </string_array>
 </resources>
 ```
-
 string-zh.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -47,13 +45,18 @@ string-zh.xml
     </string_array>
 </resources>
 ```
-4. 切换到项目根目录下执行"gostrings"命令(记得把gopath/bin加入到path环境变量中），会自动生成r文件夹和里面的go文件，不要动里面的文件。
+4. 切换到项目根目录下执行"gostrings"命令(记得把gopath/bin加入到path环境变量中），会自动生成r文件夹和里面的go文件，不要动里面的文件。如果找不到该命令请检查gopath的bin路径是否加入到环境变量中。
+```shell script
+gostrings
+```
 5. 代码中查询
 ```go
-	str, err := r.GetString("", r.Cancel) // 获取string.xml下的cancel对应的字符串
-	str, err := r.GetString("unknown", r.Cancel) // 获取string-unknown.xml下的cancel对应的字符串
-	str, err := r.GetString("zh", r.Cancel) // 获取string-zh.xml下的cancel对应的字符串
-	strArray, err := r.GetStringArray("en-us", r.City) // 获取string-en-us.xml下的city对应的字符串切片
+	import "github.com/xingliuhua/gostrings/pkg/strutil"
+    
+    str, err := strutil.ShouldGetString("", r.Cancel) // from string.xml
+    str := strutil.GetString("unknown", r.Cancel) // from string-unknown.xml
+    str := strutil.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
+    strArray, err := strutil.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
 ```
 在实际的开发中，可以根据http参数或Accept-Language头字段选择语言。
 ## 维护

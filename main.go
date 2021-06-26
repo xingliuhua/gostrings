@@ -2,23 +2,20 @@ package main
 
 import (
 	"bytes"
-	_ "embed"
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/iancoleman/strcase"
-	"github.com/xingliuhua/gostrings/model"
+	"github.com/xingliuhua/gostrings/internal/model"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
 )
 
-//go:embed utils.go.txt
-var src string
-
 func main() {
-	fmt.Println("will generate r directory \nkey will be translate to camel style...")
+	logo := "                                   ___                                                          \n                                 ,--.'|_             ,--,                                       \n              ,---.              |  | :,'   __  ,-.,--.'|         ,---,                         \n  ,----._,.  '   ,'\\   .--.--.   :  : ' : ,' ,'/ /||  |,      ,-+-. /  |  ,----._,.  .--.--.    \n /   /  ' / /   /   | /  /    '.;__,'  /  '  | |' |`--'_     ,--.'|'   | /   /  ' / /  /    '   \n|   :     |.   ; ,. :|  :  /`./|  |   |   |  |   ,',' ,'|   |   |  ,\"' ||   :     ||  :  /`./   \n|   | .\\  .'   | |: :|  :  ;_  :__,'| :   '  :  /  '  | |   |   | /  | ||   | .\\  .|  :  ;_     \n.   ; ';  |'   | .; : \\  \\    `. '  : |__ |  | '   |  | :   |   | |  | |.   ; ';  | \\  \\    `.  \n'   .   . ||   :    |  `----.   \\|  | '.'|;  : |   '  : |__ |   | |  |/ '   .   . |  `----.   \\ \n `---`-'| | \\   \\  /  /  /`--'  /;  :    ;|  , ;   |  | '.'||   | |--'   `---`-'| | /  /`--'  / \n .'__/\\_: |  `----'  '--'.     / |  ,   /  ---'    ;  :    ;|   |/       .'__/\\_: |'--'.     /  \n |   :    :            `--'---'   ---`-'           |  ,   / '---'        |   :    :  `--'---'   \n  \\   \\  /                                          ---`-'                \\   \\  /              \n   `--`-'                                                                  `--`-'               \n"
+	fmt.Println(logo)
+	fmt.Println("generate r directory...")
 
 	err := generateStringResource()
 	if err != nil {
@@ -33,10 +30,10 @@ func generateStringResource() error {
 	if err != nil {
 		return err
 	}
-	err = createUtilFile()
-	if err != nil {
-		return err
-	}
+	//err = createUtilFile()
+	//if err != nil {
+	//	return err
+	//}
 	stringReses, err := parseAllXML()
 	if err != nil {
 		return err
@@ -45,32 +42,33 @@ func generateStringResource() error {
 	allStringData := make(map[string]map[string]string)
 	allStringArrayData := make(map[string]map[string][]string)
 	for local, stringRes := range stringReses {
-		localKeys := make(map[string]string)
-		for _, v := range stringRes.StringArrays {
-			if _, exist := localKeys[strcase.ToCamel(v.Name)]; exist {
+		if allStringData[local] == nil {
+			allStringData[local] = make(map[string]string)
+		}
+		for _, v := range stringRes.Strings {
+			if _, exist := allStringData[local][v.Name]; exist {
 				return errors.New("Duplicate name:" + v.Name)
 			}
-			localKeys[strcase.ToCamel(v.Name)] = strcase.ToCamel(v.Name)
-			allKey[strcase.ToCamel(v.Name)] = strcase.ToCamel(v.Name)
+			allKey[wrapStringKey(v.Name)] = v.Name
+
+			allStringData[local][v.Name] = v.Text
+		}
+
+		if allStringArrayData[local] == nil {
+			allStringArrayData[local] = make(map[string][]string)
+		}
+		for _, v := range stringRes.StringArrays {
+
+			if _, exist := allStringArrayData[local][v.Name]; exist {
+				return errors.New("Duplicate name:" + v.Name)
+			}
+
+			allKey[wrapArrayKey(v.Name)] = v.Name
 			strings := make([]string, 0)
 			for _, string := range v.Items {
 				strings = append(strings, string)
 			}
-			if allStringArrayData[local] == nil {
-				allStringArrayData[local] = make(map[string][]string)
-			}
-			allStringArrayData[local][strcase.ToCamel(v.Name)] = strings
-		}
-		for _, v := range stringRes.Strings {
-			if _, exist := localKeys[strcase.ToCamel(v.Name)]; exist {
-				return errors.New("Duplicate name:" + v.Name)
-			}
-			localKeys[strcase.ToCamel(v.Name)] = strcase.ToCamel(v.Name)
-			allKey[strcase.ToCamel(v.Name)] = strcase.ToCamel(v.Name)
-			if allStringData[local] == nil {
-				allStringData[local] = make(map[string]string)
-			}
-			allStringData[local][strcase.ToCamel(v.Name)] = v.Text
+			allStringArrayData[local][v.Name] = strings
 		}
 	}
 	err = writeKeyData(allKey)
@@ -85,6 +83,12 @@ func generateStringResource() error {
 	exec.Command("bash", "-c", "go fmt ./r/r.go").Run()
 	return nil
 }
+func wrapStringKey(key string) string {
+	return "String_" + key
+}
+func wrapArrayKey(key string) string {
+	return "Array_" + key
+}
 func writeInitData(stringsData map[string]map[string]string, stringArrayData map[string]map[string][]string) error {
 	r, err := os.OpenFile("./r/r.go", os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
@@ -92,7 +96,7 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 	}
 	defer r.Close()
 	bufferString := bytes.NewBufferString("func init() {\n")
-	_, err = bufferString.WriteString("allString=map[string]map[string]string{\n")
+	_, err = bufferString.WriteString("allString := map[string]map[string]string{\n")
 	if err != nil {
 		return err
 	}
@@ -119,7 +123,7 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 		return err
 	}
 
-	_, err = bufferString.WriteString("allStringArray = map[string]map[string][]string{\n")
+	_, err = bufferString.WriteString("allStringArray := map[string]map[string][]string{\n")
 	if err != nil {
 		return err
 	}
@@ -150,7 +154,15 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 			return err
 		}
 	}
-	_, err = bufferString.WriteString("}\n}\n")
+	_, err = bufferString.WriteString("}\n")
+	if err != nil {
+		return err
+	}
+	_, err = bufferString.WriteString("strutil.SetData(allString,allStringArray)")
+	if err != nil {
+		return err
+	}
+	_, err = bufferString.WriteString("}\n")
 	if err != nil {
 		return err
 	}
@@ -168,7 +180,7 @@ func writeKeyData(allKeys map[string]string) error {
 	}
 	defer r.Close()
 	bufferString := bytes.NewBufferString("")
-	_, err = bufferString.WriteString("package r\n")
+	_, err = bufferString.WriteString("package r\nimport \"github.com/xingliuhua/gostrings/pkg/strutil\"\n")
 	if err != nil {
 		return err
 	}
@@ -207,34 +219,6 @@ func createRFile() error {
 		if err != nil {
 			return err
 		}
-	}
-	return nil
-}
-func createUtilFile() error {
-	file, err := os.Open("./r")
-	defer file.Close()
-	if exist := os.IsNotExist(err); exist {
-		err := os.Mkdir("r", 0766)
-		if err != nil {
-			return err
-		}
-	}
-	_, err = os.Open("./r/util.go")
-	if err == nil {
-		err := os.Remove("./r/util.go")
-		if err != nil {
-			return err
-		}
-	}
-	utilFile, err := os.OpenFile("./r/util.go", os.O_CREATE|os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-	defer utilFile.Close()
-	bufferString := bytes.NewBufferString(src)
-	_, err = utilFile.WriteString(bufferString.String())
-	if err != nil {
-		return err
 	}
 	return nil
 }

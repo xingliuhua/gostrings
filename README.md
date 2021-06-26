@@ -16,7 +16,7 @@ go get github.com/xingliuhua/gostrings
 
 ## Usage
 1. Create the strings folder at the root of the project.
-2. Create an. XML file in the strings folder (it must be in sting [language].XML format, and the abbreviation of the language is unlimited); for example string.xml 、string- en.xml 、string-en- us.xml 、string- zh.xml 、string- unknown.xml and so on.
+2. Create an .XML file in the strings folder (it must be in sting [language].XML format, and the abbreviation of the language is unlimited); for example string.xml 、string- en.xml 、string-en- us.xml 、string- zh.xml 、string- unknown.xml and so on.
 3. the normal string and string array can be placed in the XML file. For specific format, please refer to:
 
 string.xml
@@ -46,13 +46,20 @@ string-zh.xml
     </string_array>
 </resources>
 ```
+
 4. Switch to the root directory of the project and execute the "gostrings" command (remember to add gopath / bin to the path environment variable), which will automatically generate the R folder and the go files in it. Do not move the files in it.
+```shell script
+gostrings
+```
+
 5. in code:
 ```go
-	str, err := r.GetString("", r.Cancel) // from string.xml
-	str, err := r.GetString("unknown", r.Cancel) // from string-unknown.xml
-	str, err := r.GetString("zh", r.Cancel) // from string-zh.xml
-	strArray, err := r.GetStringArray("en-us", r.City) // from string-en-us.xml
+    import "github.com/xingliuhua/gostrings/pkg/strutil"
+
+	str, err := strutil.ShouldGetString("", r.Cancel) // from string.xml
+	str := strutil.GetString("unknown", r.Cancel) // from string-unknown.xml
+	str := strutil.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
+	strArray, err := strutil.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
 ```
 
 
