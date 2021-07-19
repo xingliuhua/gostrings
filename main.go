@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 )
 
 func main() {
@@ -30,10 +31,10 @@ func generateStringResource() error {
 	if err != nil {
 		return err
 	}
-	//err = createUtilFile()
-	//if err != nil {
+	// err = createUtilFile()
+	// if err != nil {
 	//	return err
-	//}
+	// }
 	stringReses, err := parseAllXML()
 	if err != nil {
 		return err
@@ -41,7 +42,9 @@ func generateStringResource() error {
 	allKey := make(map[string]string)
 	allStringData := make(map[string]map[string]string)
 	allStringArrayData := make(map[string]map[string][]string)
+	allLanguage := make([]string, 0)
 	for local, stringRes := range stringReses {
+		allLanguage = append(allLanguage, local)
 		if allStringData[local] == nil {
 			allStringData[local] = make(map[string]string)
 		}
@@ -71,7 +74,7 @@ func generateStringResource() error {
 			allStringArrayData[local][v.Name] = strings
 		}
 	}
-	err = writeKeyData(allKey)
+	err = writeKeyData(allLanguage, allKey)
 	if err != nil {
 		return err
 	}
@@ -84,9 +87,11 @@ func generateStringResource() error {
 	return nil
 }
 func wrapStringKey(key string) string {
+	key = strings.ReplaceAll(key, "-", "_")
 	return "String_" + key
 }
 func wrapArrayKey(key string) string {
+	key = strings.ReplaceAll(key, "-", "_")
 	return "Array_" + key
 }
 func writeInitData(stringsData map[string]map[string]string, stringArrayData map[string]map[string][]string) error {
@@ -173,7 +178,7 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 	}
 	return nil
 }
-func writeKeyData(allKeys map[string]string) error {
+func writeKeyData(allLanguage []string, allKeys map[string]string) error {
 	r, err := os.OpenFile("./r/r.go", os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		return err
@@ -184,6 +189,27 @@ func writeKeyData(allKeys map[string]string) error {
 	if err != nil {
 		return err
 	}
+	// write language
+	_, err = bufferString.WriteString("const (\n")
+	if err != nil {
+		return err
+	}
+	for _, v := range allLanguage {
+		lan := "Lan_" + v
+		if v == "" {
+			lan = "Lan_default"
+		}
+		lan = strings.ReplaceAll(lan, "-", "_")
+		_, err = bufferString.WriteString(lan + "= \"" + v + "\"\n")
+		if err != nil {
+			return err
+		}
+	}
+	_, err = bufferString.WriteString(")\n")
+	if err != nil {
+		return err
+	}
+	// write key
 	_, err = bufferString.WriteString("const (\n")
 	if err != nil {
 		return err

@@ -16,7 +16,7 @@ go get github.com/xingliuhua/gostrings
 
 ## Usage
 1. Create the strings folder at the root of the project.
-2. Create an .XML file in the strings folder (it must be in sting [language].XML format, and the abbreviation of the language is unlimited); for example string.xml 、string- en.xml 、string-en- us.xml 、string- zh.xml 、string- unknown.xml and so on.
+2. Create an .XML file in the strings folder (it must be in sting[-language].XML format, and the abbreviation of the language is unlimited); for example string.xml 、string- en.xml 、string-en- us.xml 、string- zh.xml 、string- unknown.xml and so on.
 3. the normal string and string array can be placed in the XML file. For specific format, please refer to:
 
 string.xml
@@ -56,10 +56,10 @@ gostrings
 ```go
     import "github.com/xingliuhua/gostrings/pkg/strutil"
 
-	str, err := strutil.ShouldGetString("", r.Cancel) // from string.xml
-	str := strutil.GetString("unknown", r.Cancel) // from string-unknown.xml
-	str := strutil.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
-	strArray, err := strutil.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
+	str, err := strutil.ShouldGetString(r.Lan_default, r.Cancel) // from string.xml
+	str := strutil.GetString(r.Lan_unknown, r.Cancel) // from string-unknown.xml
+	str := strutil.GetStringWithDefault(r.Lan_zh, r.Cancel) // from string-zh.xml
+	strArray, err := strutil.ShouldGetStringArray(r.Lan_en_us, r.City) // from string-en-us.xml
 ```
 
 
