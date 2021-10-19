@@ -30,10 +30,6 @@ func generateStringResource() error {
 	if err != nil {
 		return err
 	}
-	//err = createUtilFile()
-	//if err != nil {
-	//	return err
-	//}
 	stringReses, err := parseAllXML()
 	if err != nil {
 		return err
@@ -158,7 +154,7 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 	if err != nil {
 		return err
 	}
-	_, err = bufferString.WriteString("strutil.SetData(allString,allStringArray)")
+	_, err = bufferString.WriteString("gostrs.SetData(allString,allStringArray)")
 	if err != nil {
 		return err
 	}
@@ -180,7 +176,7 @@ func writeKeyData(allKeys map[string]string) error {
 	}
 	defer r.Close()
 	bufferString := bytes.NewBufferString("")
-	_, err = bufferString.WriteString("package r\nimport \"github.com/xingliuhua/gostrings/pkg/strutil\"\n")
+	_, err = bufferString.WriteString("package r\nimport \"github.com/xingliuhua/gostrings/pkg/gostrs\"\n")
 	if err != nil {
 		return err
 	}

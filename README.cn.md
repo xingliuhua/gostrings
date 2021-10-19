@@ -51,12 +51,12 @@ gostrings
 ```
 5. 代码中查询
 ```go
-	import "github.com/xingliuhua/gostrings/pkg/strutil"
+	import "github.com/xingliuhua/gostrings/pkg/gostrs"
     
-    str, err := strutil.ShouldGetString("", r.Cancel) // from string.xml
-    str := strutil.GetString("unknown", r.Cancel) // from string-unknown.xml
-    str := strutil.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
-    strArray, err := strutil.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
+    str, err := gostrs.ShouldGetString("", r.Cancel) // from string.xml
+    str := gostrs.GetString("unknown", r.Cancel) // from string-unknown.xml
+    str := gostrs.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
+    strArray, err := gostrs.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
 ```
 在实际的开发中，可以根据http参数或Accept-Language头字段选择语言。
 ## 维护

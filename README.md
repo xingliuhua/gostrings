@@ -54,12 +54,12 @@ gostrings
 
 5. in code:
 ```go
-    import "github.com/xingliuhua/gostrings/pkg/strutil"
+    import "github.com/xingliuhua/gostrings/pkg/gostrs"
 
-	str, err := strutil.ShouldGetString("", r.Cancel) // from string.xml
-	str := strutil.GetString("unknown", r.Cancel) // from string-unknown.xml
-	str := strutil.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
-	strArray, err := strutil.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
+	str, err := gostrs.ShouldGetString("", r.Cancel) // from string.xml
+	str := gostrs.GetString("unknown", r.Cancel) // from string-unknown.xml
+	str := gostrs.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
+	strArray, err := gostrs.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
 ```
 
 
