@@ -17,7 +17,7 @@
 
 ## 使用
 1. 在项目根目录创建strings文件夹。
-2. 在strings文件夹中创建.xml文件(必须是sting[语言].xml格式，语言简称不限制);比如string.xml、string-en.xml、string-en-us.xml、string-zh.xml、string-unknown.xml等。
+2. 在strings文件夹中创建.xml文件(必须是sting[-语言].xml格式，语言简称不限制);比如string.xml、string-en.xml、string-en-us.xml、string-zh.xml、string-unknown.xml等。
 3. .xml文件中可以放普通字符串和字符串数组。具体格式可以参考：
 string.xml
 ```xml
@@ -53,10 +53,10 @@ gostrings
 ```go
 	import "github.com/xingliuhua/gostrings/pkg/gostrs"
     
-    str, err := gostrs.ShouldGetString("", r.Cancel) // from string.xml
-    str := gostrs.GetString("unknown", r.Cancel) // from string-unknown.xml
-    str := gostrs.GetStringWithDefault("zh", r.Cancel) // from string-zh.xml
-    strArray, err := gostrs.ShouldGetStringArray("en-us", r.City) // from string-en-us.xml
+    str, err := gostrs.ShouldGetString(r.Lan_default, r.Cancel) // from string.xml
+    str := gostrs.GetString(r.Lan_unknown, r.Cancel) // from string-unknown.xml
+    str := gostrs.GetStringWithDefault(r.Lan_zh, r.Cancel) // from string-zh.xml
+    strArray, err := gostrs.ShouldGetStringArray(r.Lan_en_us, r.City) // from string-en-us.xml
 ```
 在实际的开发中，可以根据http参数或Accept-Language头字段选择语言。
 ## 维护
