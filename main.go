@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -79,7 +80,7 @@ func generateStringResource() error {
 		return err
 	}
 
-	exec.Command("bash", "-c", "go fmt ./r/r.go").Run()
+	exec.Command("bash", "-c", "go fmt ./strgen/r.go").Run()
 	return nil
 }
 func wrapStringKey(key string) string {
@@ -90,8 +91,8 @@ func wrapArrayKey(key string) string {
 	key = strings.ReplaceAll(key, "-", "_")
 	return "Array_" + key
 }
-func writeInitData(stringsData map[string]map[string]string, stringArrayData map[string]map[string][]string) error {
-	r, err := os.OpenFile("./r/r.go", os.O_APPEND|os.O_RDWR, 0666)
+func writeInitData(local2StringsMap map[string]map[string]string, local2StringArrayMap map[string]map[string][]string) error {
+	r, err := os.OpenFile("./strgen/r.go", os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		return err
 	}
@@ -101,14 +102,25 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 	if err != nil {
 		return err
 	}
+	localSlice := make([]string, 0)
+	for k, _ := range local2StringsMap {
+		localSlice = append(localSlice, k)
+	}
+	sort.Strings(localSlice)
 
-	for local, v := range stringsData {
+	for _, local := range localSlice {
 		_, err = bufferString.WriteString("\"" + local + "\": {\n")
 		if err != nil {
 			return err
 		}
-		for k, v2 := range v {
-			_, err = bufferString.WriteString("\"" + k + "\":\"" + v2 + "\",\n")
+		stringsMap := local2StringsMap[local]
+		keys := make([]string, 0)
+		for k, _ := range stringsMap {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			_, err = bufferString.WriteString("\"" + k + "\":\"" + stringsMap[k] + "\",\n")
 			if err != nil {
 				return err
 			}
@@ -119,6 +131,7 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 			return err
 		}
 	}
+
 	_, err = bufferString.WriteString("}\n")
 	if err != nil {
 		return err
@@ -128,18 +141,30 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 	if err != nil {
 		return err
 	}
-	for local, v := range stringArrayData {
+	localSlice = make([]string, 0)
+	for k, _ := range local2StringsMap {
+		localSlice = append(localSlice, k)
+	}
+	sort.Strings(localSlice)
+	for _, local := range localSlice {
 		_, err = bufferString.WriteString("\"" + local + "\": {\n")
 		if err != nil {
 			return err
 		}
 
-		for k, v2 := range v {
-			_, err = bufferString.WriteString("\"" + k + "\": []string{\n")
+		stringArraysMap := local2StringArrayMap[local]
+		keys := make([]string, 0)
+		for k, _ := range stringArraysMap {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _,key:=range keys{
+			_, err = bufferString.WriteString("\"" + key + "\": []string{\n")
 			if err != nil {
 				return err
 			}
-			for _, v3 := range v2 {
+
+			for _, v3 := range local2StringArrayMap[local][key] {
 				_, err = bufferString.WriteString("\"" + v3 + "\",\n")
 				if err != nil {
 					return err
@@ -155,6 +180,8 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 			return err
 		}
 	}
+
+
 	_, err = bufferString.WriteString("}\n")
 	if err != nil {
 		return err
@@ -174,12 +201,14 @@ func writeInitData(stringsData map[string]map[string]string, stringArrayData map
 	}
 	return nil
 }
-func writeKeyData(allLanguage []string, allKeys map[string]string) error {
-	r, err := os.OpenFile("./r/r.go", os.O_CREATE|os.O_RDWR, 0666)
+func writeKeyData(languages []string, allKeyMap map[string]string) error {
+	r, err := os.OpenFile("./strgen/r.go", os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		return err
 	}
 	defer r.Close()
+	// sort languages
+	sort.Strings(languages)
 	bufferString := bytes.NewBufferString("")
 	_, err = bufferString.WriteString("package r\nimport \"github.com/xingliuhua/gostrings/pkg/gostrs\"\n")
 	if err != nil {
@@ -190,7 +219,8 @@ func writeKeyData(allLanguage []string, allKeys map[string]string) error {
 	if err != nil {
 		return err
 	}
-	for _, v := range allLanguage {
+
+	for _, v := range languages {
 		lan := "Lan_" + v
 		if v == "" {
 			lan = "Lan_default"
@@ -210,8 +240,13 @@ func writeKeyData(allLanguage []string, allKeys map[string]string) error {
 	if err != nil {
 		return err
 	}
-	for k, v := range allKeys {
-		_, err = bufferString.WriteString(k + "= \"" + v + "\"\n")
+	allKeySlice := make([]string, 0)
+	for k, _ := range allKeyMap {
+		allKeySlice = append(allKeySlice, k)
+	}
+	sort.Strings(allKeySlice)
+	for _, v := range allKeySlice {
+		_, err = bufferString.WriteString(v + "= \"" + allKeyMap[v] + "\"\n")
 		if err != nil {
 			return err
 		}
@@ -227,17 +262,17 @@ func writeKeyData(allLanguage []string, allKeys map[string]string) error {
 	return nil
 }
 func createRFile() error {
-	file, err := os.Open("./r")
+	file, err := os.Open("./strgen")
 	defer file.Close()
 	if exist := os.IsNotExist(err); exist {
-		err := os.Mkdir("r", 0766)
+		err := os.Mkdir("strgen", 0766)
 		if err != nil {
 			return err
 		}
 	}
-	_, err = os.Open("./r/r.go")
+	_, err = os.Open("./strgen/r.go")
 	if err == nil {
-		err := os.Remove("./r/r.go")
+		err := os.Remove("./strgen/r.go")
 		if err != nil {
 			return err
 		}
@@ -303,3 +338,4 @@ func parseXML(fileName string) (model.StringRes, error) {
 	}
 	return res, nil
 }
+
